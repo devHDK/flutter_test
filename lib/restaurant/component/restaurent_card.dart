@@ -1,10 +1,10 @@
 import 'package:actual/common/const/colors.dart';
-import 'package:actual/common/const/data.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:actual/restaurant/model/restaurant_model.dart';
 import 'package:flutter/material.dart';
 
 class RestaurantCard extends StatelessWidget {
+  final String id;
   //이미지
   final Widget image;
   //레스토랑 이름
@@ -15,6 +15,7 @@ class RestaurantCard extends StatelessWidget {
   final int deliveryTime;
   final int deliveryFee;
   final double ratings;
+
   bool isDetail;
   String? detail;
 
@@ -29,6 +30,7 @@ class RestaurantCard extends StatelessWidget {
     required this.ratings,
     this.isDetail = false,
     this.detail,
+    required this.id,
   });
 
   factory RestaurantCard.fromModel({
@@ -36,8 +38,9 @@ class RestaurantCard extends StatelessWidget {
     bool isDetail = false,
   }) {
     return RestaurantCard(
+      id: model.id,
       image: Image.network(
-        'http://$ip${model.thumbUrl}',
+        model.thumbUrl,
         fit: BoxFit.cover,
       ),
       name: model.name,
@@ -57,11 +60,17 @@ class RestaurantCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (isDetail)
-          image
+          Hero(
+            tag: id,
+            child: image,
+          )
         else
           ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
-            child: image,
+            child: Hero(
+              tag: id,
+              child: image,
+            ),
           ),
         const SizedBox(
           height: 16.0,
