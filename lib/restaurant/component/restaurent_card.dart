@@ -1,5 +1,6 @@
 import 'package:actual/common/const/colors.dart';
 import 'package:actual/common/const/data.dart';
+import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:actual/restaurant/model/restaurant_model.dart';
 import 'package:flutter/material.dart';
 
@@ -14,18 +15,26 @@ class RestaurantCard extends StatelessWidget {
   final int deliveryTime;
   final int deliveryFee;
   final double ratings;
+  bool isDetail;
+  String? detail;
 
-  const RestaurantCard(
-      {super.key,
-      required this.image,
-      required this.name,
-      required this.tags,
-      required this.ratingsCount,
-      required this.deliveryTime,
-      required this.deliveryFee,
-      required this.ratings});
+  RestaurantCard({
+    super.key,
+    required this.image,
+    required this.name,
+    required this.tags,
+    required this.ratingsCount,
+    required this.deliveryTime,
+    required this.deliveryFee,
+    required this.ratings,
+    this.isDetail = false,
+    this.detail,
+  });
 
-  factory RestaurantCard.fromModel({required RestaurantModel model}) {
+  factory RestaurantCard.fromModel({
+    required RestaurantModel model,
+    bool isDetail = false,
+  }) {
     return RestaurantCard(
       image: Image.network(
         'http://$ip${model.thumbUrl}',
@@ -37,6 +46,8 @@ class RestaurantCard extends StatelessWidget {
       deliveryTime: model.deliveryTime,
       deliveryFee: model.deliveryFee,
       ratings: model.ratings,
+      isDetail: isDetail,
+      detail: model is RestaurantDetailModel ? model.detail : null,
     );
   }
 
@@ -45,33 +56,51 @@ class RestaurantCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12.0),
-          child: image,
-        ),
+        if (isDetail)
+          image
+        else
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12.0),
+            child: image,
+          ),
         const SizedBox(
           height: 16.0,
         ),
-        Text(
-          name,
-          style: const TextStyle(fontSize: 20.0, fontWeight: FontWeight.w500),
-        ),
-        Text(
-          tags.join(' ∙ '),
-          style: const TextStyle(color: BODY_TEXT_COLOR),
-        ),
-        const SizedBox(
-          height: 8.0,
-        ),
-        Row(
-          children: [
-            IconText(icon: Icons.star, label: ratings.toString()),
-            IconText(icon: Icons.receipt, label: ratingsCount.toString()),
-            IconText(icon: Icons.timelapse_outlined, label: '$deliveryTime분'),
-            IconText(
-                icon: Icons.monetization_on,
-                label: deliveryFee == 0 ? '무료' : deliveryFee.toString()),
-          ],
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: isDetail ? 16.0 : 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                name,
+                style: const TextStyle(
+                    fontSize: 20.0, fontWeight: FontWeight.w500),
+              ),
+              Text(
+                tags.join(' ∙ '),
+                style: const TextStyle(color: BODY_TEXT_COLOR),
+              ),
+              const SizedBox(
+                height: 8.0,
+              ),
+              Row(
+                children: [
+                  IconText(icon: Icons.star, label: ratings.toString()),
+                  IconText(icon: Icons.receipt, label: ratingsCount.toString()),
+                  IconText(
+                      icon: Icons.timelapse_outlined, label: '$deliveryTime분'),
+                  IconText(
+                      icon: Icons.monetization_on,
+                      label: deliveryFee == 0 ? '무료' : deliveryFee.toString()),
+                ],
+              ),
+              if (detail != null && isDetail)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(detail!),
+                ),
+            ],
+          ),
         )
       ],
     );

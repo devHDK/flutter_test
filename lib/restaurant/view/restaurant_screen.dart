@@ -1,6 +1,8 @@
+import 'package:actual/common/const/colors.dart';
 import 'package:actual/common/const/data.dart';
 import 'package:actual/restaurant/component/restaurent_card.dart';
 import 'package:actual/restaurant/model/restaurant_model.dart';
+import 'package:actual/restaurant/view/restaurant_detail_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +36,10 @@ class RestaurentScreen extends StatelessWidget {
             future: paginateRestaurant(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return Container();
+                return const Center(
+                    child: CircularProgressIndicator(
+                  color: PRIMARY_COLOR,
+                ));
               }
 
               return ListView.separated(
@@ -47,8 +52,16 @@ class RestaurentScreen extends StatelessWidget {
                   final item = snapshot.data![index];
                   final model = RestaurantModel.fromJson(item);
 
-                  return RestaurantCard.fromModel(
-                    model: model,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) =>
+                            RestaurantDetailScreen(id: model.id),
+                      ));
+                    },
+                    child: RestaurantCard.fromModel(
+                      model: model,
+                    ),
                   );
                 },
                 itemCount: snapshot.data!.length,
