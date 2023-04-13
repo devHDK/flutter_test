@@ -1,15 +1,13 @@
 import 'package:actual/common/const/colors.dart';
-import 'package:actual/common/const/data.dart';
-import 'package:actual/common/dio/dio.dart';
 import 'package:actual/common/layout/default_layout.dart';
 import 'package:actual/product/component/product_card.dart';
 import 'package:actual/restaurant/component/restaurent_card.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:actual/restaurant/repository/restaurant_repository.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class RestaurantDetailScreen extends StatelessWidget {
+class RestaurantDetailScreen extends ConsumerWidget {
   final String id;
 
   const RestaurantDetailScreen({
@@ -17,20 +15,11 @@ class RestaurantDetailScreen extends StatelessWidget {
     required this.id,
   });
 
-  Future<RestaurantDetailModel> getRestaurantDetail() {
-    final dio = Dio();
-    dio.interceptors.add(CustomInterceptor(storage: storage));
-
-    final repository =
-        RestaurantRepository(dio, baseUrl: 'http://$ip/restaurant');
-
-    return repository.getRestaurantDetail(id: id);
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder(
-      future: getRestaurantDetail(),
+      future:
+          ref.watch(restaurantRepositoryProvider).getRestaurantDetail(id: id),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Container(

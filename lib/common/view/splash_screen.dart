@@ -1,19 +1,21 @@
 import 'package:actual/common/const/colors.dart';
 import 'package:actual/common/const/data.dart';
 import 'package:actual/common/layout/default_layout.dart';
+import 'package:actual/common/secure_storage/secure_storage.dart';
 import 'package:actual/common/view/root_tab.dart';
 import 'package:actual/user/view/login_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SplashSceen extends StatefulWidget {
+class SplashSceen extends ConsumerStatefulWidget {
   const SplashSceen({super.key});
 
   @override
-  State<SplashSceen> createState() => _SplashSceenState();
+  ConsumerState<SplashSceen> createState() => _SplashSceenState();
 }
 
-class _SplashSceenState extends State<SplashSceen> {
+class _SplashSceenState extends ConsumerState<SplashSceen> {
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,7 @@ class _SplashSceenState extends State<SplashSceen> {
   }
 
   void checkToken() async {
+    final storage = ref.read(seccureStorageProvider);
     final refreshToken = await storage.read(key: REFRESH_TOKEN_KEY);
     final accessToken = await storage.read(key: ACCESS_TOKEN_KEY);
 
