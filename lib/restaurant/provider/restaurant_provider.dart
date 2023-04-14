@@ -1,7 +1,19 @@
 import 'package:actual/common/model/cursor_pagination_model.dart';
 import 'package:actual/common/model/pagination_params.dart';
+import 'package:actual/restaurant/model/restaurant_model.dart';
 import 'package:actual/restaurant/repository/restaurant_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+final restaurantDetailProvider = Provider.family<RestaurantModel?, String>(
+  (ref, id) {
+    final state = ref.watch(restaurantProvider);
+
+    if (state is! CursorPagination) {
+      return null;
+    }
+    return state.data.firstWhere((element) => element.id == id);
+  },
+);
 
 final restaurantProvider =
     StateNotifierProvider<RestaurantStateNotifier, CursorPaginationBase>(
@@ -23,7 +35,7 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
     paginate();
   }
 
-  paginate({
+  Future<void> paginate({
     int fetchCount = 20,
     //추가로 데이터 더 가져오기
     //true - 추가로 데이터 더 가져옴
@@ -45,7 +57,7 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
       //5)CursorPaginationFetchingMore - 추가데이터를 paginate 해오라는 요청을 받았을때
 
       //바로 반환하는 상황
-      //1) hasMore == false  (기존 상ㅌ태에서 이미 다음데이터가 없다는 값을 들고 있다면)
+      //1) hasMore == false  (기존 상태에서 이미 다음데이터가 없다는 값을 들고 있다면)
       //2) 로딩중 - fetchMore == true
       //          fetchMore == false 일때 - 새로 고침의 의도가 있을수 있다.
 
@@ -120,5 +132,29 @@ class RestaurantStateNotifier extends StateNotifier<CursorPaginationBase> {
     } catch (e) {
       state = CursorPaginationError(message: '데이터를 가져오지 못했습니다');
     }
+  }
+
+  void getDetail({
+    required String id,
+  }) async {
+    //만약에 아직 데이터가 하나도 없는 상태라면 (CursorPagination이 아니라면)
+    if (state is! CursorPagination) {
+      await paginate();
+    }
+
+    if (state is! CursorPagination) {
+      return;
+    }
+
+    final pState = state as CursorPagination;
+    final response = await repository.getRestaurantDetail(id: id);
+
+    state = pState.copyWith(
+        //기존 state로 대체
+        data: pState.data
+            .map<RestaurantModel>(
+              (e) => e.id == id ? response : e,
+            )
+            .toList());
   }
 }
