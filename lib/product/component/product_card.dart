@@ -1,5 +1,5 @@
 import 'package:actual/common/const/colors.dart';
-import 'package:actual/common/const/data.dart';
+import 'package:actual/product/model/product_model.dart';
 import 'package:actual/restaurant/model/restaurant_detail_model.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +19,23 @@ class ProductCard extends StatelessWidget {
     required this.image,
   });
 
-  factory ProductCard.fromModel({required RestaurantProduct model}) {
+  factory ProductCard.fromRestaurantProductModel(
+      {required RestaurantProduct model}) {
+    return ProductCard(
+      id: model.id,
+      image: Image.network(
+        model.imgUrl,
+        height: 110,
+        width: 110,
+        fit: BoxFit.cover,
+      ),
+      name: model.name,
+      detail: model.detail,
+      price: model.price,
+    );
+  }
+
+  factory ProductCard.fromProductModel({required ProductModel model}) {
     return ProductCard(
       id: model.id,
       image: Image.network(
