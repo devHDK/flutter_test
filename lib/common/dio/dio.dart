@@ -1,5 +1,6 @@
 import 'package:actual/common/const/data.dart';
 import 'package:actual/common/secure_storage/secure_storage.dart';
+import 'package:actual/user/provider/auth_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -9,7 +10,7 @@ final dioProvider = Provider(
     final dio = Dio();
     final storage = ref.watch(seccureStorageProvider);
 
-    dio.interceptors.add(CustomInterceptor(storage: storage));
+    dio.interceptors.add(CustomInterceptor(storage: storage, ref: ref));
 
     return dio;
   },
@@ -17,8 +18,10 @@ final dioProvider = Provider(
 
 class CustomInterceptor extends Interceptor {
   final FlutterSecureStorage storage;
+  final Ref ref;
 
   CustomInterceptor({
+    required this.ref,
     required this.storage,
   });
 // 1)요청 보낼때
@@ -97,6 +100,10 @@ class CustomInterceptor extends Interceptor {
         //성공
         return handler.resolve(response);
       } on DioError catch (e) {
+        //circular dependency error
+        // A, B
+        ref.read(authProvider.notifier).logout();
+
         return handler.reject(e);
       }
     }
